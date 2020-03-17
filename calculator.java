@@ -1,7 +1,7 @@
 import java.util.Stack;
 
 public class calculator {
-    private Stack<E> stack = new stack();
+    private stack stack = new stack();
     private String infix;
     private String postfix = "";
     private int result;
@@ -12,17 +12,17 @@ public class calculator {
         calculate();
     }
 
-    private boolean isOpperator(char c){
+    private boolean isOperator(char c){
         switch (c) {
-            case "+":
+            case '+':
                 return true;
-            case "-":
+            case '-':
                 return true;    
-            case "/":
+            case '/':
                 return true;
-            case "^":
+            case '^':
                 return true;
-            case "*":
+            case '*':
                 return true;     
             default:
                 return false;
@@ -40,15 +40,15 @@ public class calculator {
 
     private int precedence(char c){
         switch (c) {
-            case "+":
+            case '+':
                 return 2;
-            case "-":
+            case '-':
                 return 1;    
-            case "/":
+            case '/':
                 return 4;
-            case "^":
+            case '^':
                 return 5;
-            case "*":
+            case '*':
                 return 3;     
             default:
                 return 0;
@@ -57,14 +57,14 @@ public class calculator {
 
     public void getPostfix(){
         char temp;
-        for (int i = 0; i < infix.length; i++) {
+        for (int i = 0; i < infix.length(); i++) {
             temp = infix.charAt(i);
-            // Checks to see if the char is an opperand or opperator
-            // If opperand -> add to postfix
+            // Checks to see if the char is an operand or operator
+            // If operand -> add to postfix
             if(Character.isLetterOrDigit(temp)){
                 postfix+=temp;
             }
-            else if (isOpperator(temp)) {
+            else if (isOperator(temp)) {
                 // Pushes operator to empty stack
                 if (stack.listSize == 0) {
                     stack.push(temp);
