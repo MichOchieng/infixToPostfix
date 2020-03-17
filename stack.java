@@ -18,6 +18,7 @@ public class stack extends linkedlist{
             listSize--;
             return temp.getVal();
         }
+        return 'x';
     }
 
     public void viewStack(){
@@ -25,7 +26,7 @@ public class stack extends linkedlist{
         System.out.println("There are " + listSize + " elements in this stack.");
     }
 
-    public void peek(){
+    public char peek(){
         return headNode.getNext().getVal();
     }
 }
