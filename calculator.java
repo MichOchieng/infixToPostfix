@@ -1,0 +1,76 @@
+
+public class calculator {
+    private stack stack = new stack();
+    private String infix;
+    private String postfix = "";
+    private int result;
+
+    public calculator(String infix){
+        this.infix = infix;
+        getPostfix();
+        calculate();
+    }
+
+    private boolean isOpperator(char c){
+        switch (c) {
+            case "+":
+                return true;
+            case "-":
+                return true;    
+            case "/":
+                return true;
+            case "^":
+                return true;
+            case "*":
+                return true;     
+            default:
+                return false;
+        }
+    }
+
+    public void getPostfix(){
+        char temp;
+        for (int i = 0; i < infix.length; i++) {
+            temp = infix.charAt(i);
+            // Checks to see if the char is an opperand or opperator
+            // If opperand -> add to postfix
+            if(Character.isLetterOrDigit(temp)){
+                postfix+=temp;
+            }
+            else if (isOpperator(temp)) {
+                // Pushes operator to empty stack
+                if (stack.listSize == 0) {
+                    stack.push(temp);
+                } else {
+                    if (condition) {
+                        
+                    } else {
+                        
+                    }
+                }
+            }
+            // If temp is an opening bracket push to stack
+            else if (temp == '(') {
+                stack.push(temp);
+            }            
+            else if (temp == ')'){
+                if(stack.listSize == 0){
+                    System.out.println("Invalid infix entered.");
+                }
+                else{
+                    // Pops the top of the stack until an opening bracket is found then pops the opening bracket.
+                    while (stack.listSize != 0 && stack.peek() != '(') {
+                        postfix+=stack.pop();
+                    }
+                    stack.pop();
+                }
+            }
+        }
+    }
+
+    public void calculate(){
+
+    }
+
+    
+}
