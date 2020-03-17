@@ -1,6 +1,7 @@
+import java.util.Stack;
 
 public class calculator {
-    private stack stack = new stack();
+    private Stack<E> stack = new stack();
     private String infix;
     private String postfix = "";
     private int result;
@@ -28,6 +29,32 @@ public class calculator {
         }
     }
 
+    // Determines if a char x is higher precednece than the element at the top of the stack
+    private boolean highPrecedence(char c){
+        if (precedence(c) < precedence(stack.peek()) || precedence(c) == precedence(stack.peek())) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private int precedence(char c){
+        switch (c) {
+            case "+":
+                return 2;
+            case "-":
+                return 1;    
+            case "/":
+                return 4;
+            case "^":
+                return 5;
+            case "*":
+                return 3;     
+            default:
+                return 0;
+        }
+    }
+
     public void getPostfix(){
         char temp;
         for (int i = 0; i < infix.length; i++) {
@@ -42,10 +69,10 @@ public class calculator {
                 if (stack.listSize == 0) {
                     stack.push(temp);
                 } else {
-                    if (condition) {
-                        
+                    if (highPrecedence(temp)) {
+                        stack.push(temp);
                     } else {
-                        
+                        // do something
                     }
                 }
             }
@@ -63,6 +90,13 @@ public class calculator {
                         postfix+=stack.pop();
                     }
                     stack.pop();
+                }
+            }
+            while (stack.listSize != 0) {
+                if (stack.peek() == '(') {
+                    System.out.println("Invalid infix entered.");
+                } else {
+                    postfix+=stack.pop();
                 }
             }
         }
