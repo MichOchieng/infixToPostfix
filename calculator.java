@@ -1,5 +1,3 @@
-import java.util.Stack;
-
 public class calculator {
     private stack stack = new stack();
     private String infix;
@@ -31,7 +29,7 @@ public class calculator {
 
     // Determines if a char x is higher precednece than the element at the top of the stack
     private boolean highPrecedence(char c){
-        if (precedence(c) < precedence(stack.peek()) || precedence(c) == precedence(stack.peek())) {
+        if (precedence(c) >= precedence(stack.peek())) {
             return true;
         } else {
             return false;
@@ -49,13 +47,13 @@ public class calculator {
             case '^':
                 return 5;
             case '*':
-                return 3;     
+                return 3;            
             default:
                 return 0;
         }
     }
 
-    public void getPostfix(){
+    private void getPostfix(){
         char temp;
         for (int i = 0; i < infix.length(); i++) {
             temp = infix.charAt(i);
@@ -69,10 +67,16 @@ public class calculator {
                 if (stack.listSize == 0) {
                     stack.push(temp);
                 } else {
+                    // If operator is higher or equal precedence than the top of stack push to stack
                     if (highPrecedence(temp)) {
                         stack.push(temp);
                     } else {
-                        // do something
+                    // If operator is lower precedence keep popping stack into postfix
+                    // until stack is empty or top element on stack is of higher/equal precedence
+                        while (stack.listSize != 0 && !highPrecedence(temp)) {
+                            postfix+=stack.pop();
+                        }
+                        stack.push(temp);
                     }
                 }
             }
@@ -90,19 +94,23 @@ public class calculator {
                         postfix+=stack.pop();
                     }
                     stack.pop();
+                }                
+            }
+            if(temp == infix.charAt(infix.length()-1)){
+                while (stack.listSize != 0 && stack.peek() != '(') {
+                    if (stack.peek() == '(') {
+                        System.out.println("Invalid infix entered.");
+                    } else {
+                        postfix+=stack.pop();
+                    }
                 }
             }
-            while (stack.listSize != 0) {
-                if (stack.peek() == '(') {
-                    System.out.println("Invalid infix entered.");
-                } else {
-                    postfix+=stack.pop();
-                }
-            }
+            
         }
+        System.out.println("Postfix expression: " + postfix);
     }
 
-    public void calculate(){
+    private void calculate(){
 
     }
 
