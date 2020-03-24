@@ -2,10 +2,9 @@ public class calculator {
     private stack infixStack = new stack();
     private doubleStack postfixStack = new doubleStack();
     private String infix;
-    private String postfix = "";
-    private String token = "";
-    private int result;
+    private String postfix = "";    
     private int index = 0;
+    private boolean negativeNum = false;
 
     public calculator(String infix){
         this.infix = infix;
@@ -17,12 +16,42 @@ public class calculator {
     public void tokenizer(String str,int i){        
         char temp = str.charAt(i);
         // Grabs value        
-        while (Character.isLetterOrDigit(temp) && i<=str.length()-1) {
+        // Adds a negative to the value where applicable
+        if (temp == '-' && i > 0) {     
+            char previous = str.charAt(i-1);           
+            // First element 
+            // Previous element is an operator               
+            // Previous element is a bracket 
+            if (isOperator(previous) || previous == '(' || previous == ')') {
+                postfix+=temp;                     
+            }              
+            if (i == str.length()-1) {
+                i++;                     
+            }  
+            else{
+                i++;            
+                temp = str.charAt(i);  
+            }                    
+        }
+        else if(temp == '-' && i == 0){
             postfix+=temp;
+            if (i == str.length()-1) {
+                i++;                     
+            }  
+            else{
+                i++;            
+                temp = str.charAt(i);  
+            }    
+        }
+        // Adds operand values to postfix
+        while (Character.isLetterOrDigit(temp) && i<=str.length()-1) {            
+            postfix+=temp;
+            // Avoids infinite loop
             if (i == str.length()-1) {
                 i++;  
                 continue;   
-            }  
+            } 
+            // Avoids ArrayIndexOutOfBoundsException
             else{
                 i++;            
                 temp = str.charAt(i);  
@@ -30,8 +59,10 @@ public class calculator {
         }
         // Resets the index to where the value ends
         index = i-1;
-        // Adds spaces between values
-        postfix+=" ";  
+        // Adds spaces after values only if the value isn't a negative operator
+        if (temp != '-') {
+            postfix+=" "; 
+        } 
           
     }    
 
@@ -84,14 +115,19 @@ public class calculator {
             temp = infix.charAt(i);            
             // Checks to see if the char is an operand or operator
             // If operand -> add to postfix
-            if(Character.isLetterOrDigit(temp)){     
-                // Grabs values and moves temp value accordingly               
+            if(Character.isLetterOrDigit(temp) || temp == '-'){     
+                // Grabs values and moves temp value accordingly   
+                // If a negative number is present sets negativeNum true so that the 
+                // Negative operator isn't pushed to the stack
+                if (temp == '-') {
+                    negativeNum = true;
+                }          
                 tokenizer(infix,i);
                 i = index;                 
                 // postfix+=temp;
                 // postfix+=" "; 
             }
-            else if (isOperator(temp)) {
+            else if (isOperator(temp) && !negativeNum) {
                 // Pushes operator to empty stack
                 if (infixStack.listSize == 0) {
                     infixStack.push(temp);
@@ -128,6 +164,7 @@ public class calculator {
                     infixStack.pop();
                 }                
             }
+            // Once at the end of the infix pops everything from stack to postfix
             if(temp == infix.charAt(infix.length()-1)){
                 while (infixStack.listSize != 0 && infixStack.peek() != '(') {
                     if (infixStack.peek() == '(') {
@@ -139,7 +176,8 @@ public class calculator {
                     }
                 }
             }
-            
+            // Resets for next loop
+            negativeNum = false;
         }
         System.out.println("Postfix expression: " + postfix);
     }
@@ -175,10 +213,18 @@ public class calculator {
         double result;
         for (int i = 0; i < postfix.length(); i++) {
             temp = postfix.charAt(i);            
-            if(Character.isDigit(temp)){
+            if(Character.isDigit(temp) || temp == '-'){
                 // Creates a string and adds each number of the given value
-                // Turns the string into a double and pushes to stack
+                // Turns the string into a double and pushes to stack                
                 String value = "";
+                // Accounts for negative numbers
+                if (temp == '-' && i < postfix.length()-1) {
+                    if (Character.isDigit(postfix.charAt(i+1))) {
+                        value+=temp;
+                        i++;
+                        temp = postfix.charAt(i);
+                    }
+                }
                 while (Character.isDigit(temp)) {                    
                     value+=temp;
                     i++;
@@ -270,4 +316,3 @@ public class calculator {
         }
     }
 }
-
