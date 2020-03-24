@@ -1,14 +1,39 @@
 public class calculator {
-    private stack stack = new stack();
+    private stack infixStack = new stack();
+    private doubleStack postfixStack = new doubleStack();
     private String infix;
     private String postfix = "";
+    private String token = "";
     private int result;
+    private int index = 0;
 
     public calculator(String infix){
         this.infix = infix;
         getPostfix();
         calculate();
     }
+
+
+    public void tokenizer(String str,int i){        
+        char temp = str.charAt(i);
+        // Grabs value        
+        while (Character.isLetterOrDigit(temp) && i<=str.length()-1) {
+            postfix+=temp;
+            if (i == str.length()-1) {
+                i++;  
+                continue;   
+            }  
+            else{
+                i++;            
+                temp = str.charAt(i);  
+            }                 
+        }
+        // Resets the index to where the value ends
+        index = i-1;
+        // Adds spaces between values
+        postfix+=" ";  
+          
+    }    
 
     private boolean isOperator(char c){
         switch (c) {
@@ -29,7 +54,7 @@ public class calculator {
 
     // Determines if a char x is higher precednece than the element at the top of the stack
     private boolean highPrecedence(char c){
-        if (precedence(c) >= precedence(stack.peek())) {
+        if (precedence(c) >= precedence(infixStack.peek())) {
             return true;
         } else {
             return false;
@@ -54,54 +79,63 @@ public class calculator {
     }
 
     private void getPostfix(){
-        char temp;
-        for (int i = 0; i < infix.length(); i++) {
-            temp = infix.charAt(i);
+        char temp;        
+        for (int i = index; i < infix.length(); i++) {            
+            temp = infix.charAt(i);            
             // Checks to see if the char is an operand or operator
             // If operand -> add to postfix
-            if(Character.isLetterOrDigit(temp)){
-                postfix+=temp;
+            if(Character.isLetterOrDigit(temp)){     
+                // Grabs values and moves temp value accordingly               
+                tokenizer(infix,i);
+                i = index;                 
+                // postfix+=temp;
+                // postfix+=" "; 
             }
             else if (isOperator(temp)) {
                 // Pushes operator to empty stack
-                if (stack.listSize == 0) {
-                    stack.push(temp);
+                if (infixStack.listSize == 0) {
+                    infixStack.push(temp);
                 } else {
                     // If operator is higher or equal precedence than the top of stack push to stack
                     if (highPrecedence(temp)) {
-                        stack.push(temp);
+                        infixStack.push(temp);
                     } else {
                     // If operator is lower precedence keep popping stack into postfix
                     // until stack is empty or top element on stack is of higher/equal precedence
-                        while (stack.listSize != 0 && !highPrecedence(temp)) {
-                            postfix+=stack.pop();
+                        while (infixStack.listSize != 0 && !highPrecedence(temp)) {
+                            postfix+=infixStack.pop();
+                            postfix+=" "; 
                         }
-                        stack.push(temp);
+                        infixStack.push(temp);
                     }
                 }
             }
             // If temp is an opening bracket push to stack
             else if (temp == '(') {
-                stack.push(temp);
+                infixStack.push(temp);
             }            
             else if (temp == ')'){
-                if(stack.listSize == 0){
+                if(infixStack.listSize == 0){
                     System.out.println("Invalid infix entered.");
+                    break;
                 }
                 else{
                     // Pops the top of the stack until an opening bracket is found then pops the opening bracket.
-                    while (stack.listSize != 0 && stack.peek() != '(') {
-                        postfix+=stack.pop();
+                    while (infixStack.listSize != 0 && infixStack.peek() != '(') {
+                        postfix+=infixStack.pop();
+                        postfix+=" "; 
                     }
-                    stack.pop();
+                    infixStack.pop();
                 }                
             }
             if(temp == infix.charAt(infix.length()-1)){
-                while (stack.listSize != 0 && stack.peek() != '(') {
-                    if (stack.peek() == '(') {
+                while (infixStack.listSize != 0 && infixStack.peek() != '(') {
+                    if (infixStack.peek() == '(') {
                         System.out.println("Invalid infix entered.");
+                        break;
                     } else {
-                        postfix+=stack.pop();
+                        postfix+=infixStack.pop();
+                        postfix+=" "; 
                     }
                 }
             }
@@ -110,9 +144,130 @@ public class calculator {
         System.out.println("Postfix expression: " + postfix);
     }
 
-    private void calculate(){
-
+    // Determines what operation will be preformed in calculating postfix
+    // Then pushes the result to the stack
+    private void operation(double a, double b,char opp){
+        int operator = precedence(opp);
+        switch (operator) {
+            case 2:
+                postfixStack.push((a+b));
+                break;
+            case 1:
+                postfixStack.push((a-b));
+                break;   
+            case 4:
+                postfixStack.push((a/b));
+                break;
+            case 5:
+                postfixStack.push((Math.pow(a, b)));
+                break;
+            case 3:
+                postfixStack.push((a*b));
+                break;          
+            default:
+                System.out.println("Something went wrong");
+                break;
+        }
     }
 
+    private void calculate(){
+        char temp;
+        double result;
+        for (int i = 0; i < postfix.length(); i++) {
+            temp = postfix.charAt(i);            
+            if(Character.isDigit(temp)){
+                // Creates a string and adds each number of the given value
+                // Turns the string into a double and pushes to stack
+                String value = "";
+                while (Character.isDigit(temp)) {                    
+                    value+=temp;
+                    i++;
+                    temp = postfix.charAt(i);
+                }                      
+                double x = Double.parseDouble(value);
+                postfixStack.push(x);              
+            }
+            else if(isOperator(temp)){                
+                // Pop last two elements from the stack
+                double a = postfixStack.pop();
+                double b = postfixStack.pop();
+                // Evaluate and push to stack
+                operation(b,a,temp);
+            }
+            else{
+                continue;
+            }
+        }    
+        result = postfixStack.pop();    
+        System.out.println("Result: " + result);        
+    }
+
+    // Stack and nodes used for calculating Postfix expression
+
+    public class doubleNode{
+        private doubleNode next;
+        private doubleNode previous;
+        private double val;
+        
+        public doubleNode(double val){
+            this.val = val;
+        }
+
+        public doubleNode(){}
+
+        public void setNext(doubleNode node){
+            this.next = node;
+        }
     
+        public doubleNode getNext(){
+            return next;
+        }
+    
+        public doubleNode getPrevious(){
+            return previous;
+        }
+    
+        public void setPrevious(doubleNode node){
+            this.previous = node;
+        }
+        
+        public double getVal(){
+            return this.val;
+        }
+    }
+
+    public class doubleStack extends linkedlist{
+        public doubleNode headNode = new doubleNode();
+        public doubleNode tailNode;
+
+        public void push(double c){
+            doubleNode temp = new doubleNode(c);  
+            System.out.println("Pushing " + c);          
+            if(headNode.getNext() == null){
+                headNode.setNext(temp);            
+                listSize++;
+            }else{
+                temp.setNext(headNode.getNext());
+                headNode.setNext(temp);
+                listSize++;            
+            }   
+        }
+        
+        public double pop(){
+            if(headNode.getNext() == null){
+                System.out.println("Stack is empty");
+                listSize--;
+            }
+            else{
+                doubleNode temp = headNode.getNext();
+                headNode.setNext(temp.getNext());
+                temp.setNext(null);
+                System.out.println("Popped " + temp.getVal());
+                listSize--;
+                return temp.getVal();
+            }
+            return 0.0;
+        }
+    }
 }
+
